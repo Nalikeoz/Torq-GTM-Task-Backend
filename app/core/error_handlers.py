@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.schemas.error import ErrorResponse
+from http import HTTPStatus
+
 
 
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
@@ -30,7 +32,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """Handle validation errors (e.g., invalid IP address format)."""
     error_response = ErrorResponse(error="Invalid request format. Please provide a valid IP address.")
     return JSONResponse(
-        status_code=422,
+        status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         content=error_response.model_dump()
     )
 
@@ -39,7 +41,7 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
     """Handle all other unexpected exceptions."""
     error_response = ErrorResponse(error="An internal server error occurred.")
     return JSONResponse(
-        status_code=500,
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         content=error_response.model_dump()
     )
 
