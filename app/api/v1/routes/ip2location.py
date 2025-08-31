@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query
 from pydantic import IPvAnyAddress
-from app.models import LocationResponse
+from app.schemas.location import LocationResponse
 
 router = APIRouter(prefix="/v1", tags=["location"])
 
@@ -22,3 +22,8 @@ async def find_country(ip: IPvAnyAddress = Query(..., description="IP address to
         ip=ip_str,
         message=f"IP address {ip_str} received successfully"
     )
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}

@@ -1,15 +1,17 @@
-import os
+import uvicorn
 from fastapi import FastAPI
-from app.routes import router
+from app.core.config import settings
+from app.api.v1.routes.ip2location import router
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="IP Location Service",
-        description="A simple service to find country information by IP address",
-        version="1.0.0"
+        title=settings.title,
+        description=settings.description,
+        version=settings.version
     )
     
+    # Include API routers
     app.include_router(router)
     
     return app
@@ -17,10 +19,5 @@ def create_app() -> FastAPI:
 app = create_app()
 
 if __name__ == "__main__":
-    import uvicorn
-    # Get configuration from environment variables with sensible defaults
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8000"))
-    
-    print(f"Starting server on {host}:{port}")
-    uvicorn.run(app, host=host, port=port)
+    print(f"Starting server on {settings.host}:{settings.port}")
+    uvicorn.run(app, host=settings.host, port=settings.port)
