@@ -19,23 +19,15 @@ async def find_country(ip: IPvAnyAddress = Query(..., description="IP address to
     """
     try:
         ip_address = str(ip)
+        ip_object = ipaddress.ip_address(ip_address)
         
-        # Check if IP is private/local
-        ip_obj = ipaddress.ip_address(ip_address)
-        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+        if not ip_object.is_global:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail="Private, loopback, or link-local IP addresses are not supported"
             )
         
-        ip_location = settings.ip_to_location_service.get_location(ip_address)
-        
-        # Check if we got valid location data
-        if not ip_location:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail="Location information not found for the provided IP address"
-            )
+        ip_location = get_ip_location(ip_address)
         
         # Extract country name from IP2Location response
         country_name = getattr(ip_location, 'country_long', 'Unknown')
@@ -62,3 +54,16 @@ async def find_country(ip: IPvAnyAddress = Query(..., description="IP address to
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="An internal server error occurred while processing your request"
         )
+
+
+def get_ip_location(ip_address: str) -> LocationResponse:
+    ip_location = settings.ip_to_location_service.get_location(ip_address)
+    
+    # Check if we got valid location data
+    if not ip_location:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Location information not found for the provided IP address"
+        )
+        
+    return ip_location
