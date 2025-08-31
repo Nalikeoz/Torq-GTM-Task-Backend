@@ -21,18 +21,11 @@ async def find_country(ip: IPvAnyAddress = Query(..., description="IP address to
         ip_address = str(ip)
         
         # Check if IP is private/local
-        try:
-            ip_obj = ipaddress.ip_address(ip_address)
-            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
-                raise HTTPException(
-                    status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                    detail="Private, loopback, or link-local IP addresses are not supported"
-                )
-        except ValueError:
-            # This shouldn't happen due to Pydantic validation, but just in case
+        ip_obj = ipaddress.ip_address(ip_address)
+        if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                detail="Invalid IP address format"
+                detail="Private, loopback, or link-local IP addresses are not supported"
             )
         
         ip_location = settings.ip_to_location_service.get_location(ip_address)
