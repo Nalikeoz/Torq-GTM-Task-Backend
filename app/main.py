@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.routes.ip2location import router
 from app.core.error_handlers import (
@@ -18,6 +19,13 @@ def create_app() -> FastAPI:
         description=settings.description,
         version=settings.version
     )
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
     
     # Include API routers
     app.include_router(router)
