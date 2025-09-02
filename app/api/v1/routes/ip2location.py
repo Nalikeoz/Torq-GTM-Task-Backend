@@ -28,17 +28,16 @@ async def find_country(ip: IPvAnyAddress = Query(..., description="IP address to
             )
         
         ip_location = get_ip_location(ip_address)
-        # Extract country name from IP2Location response
+        # Extract country name from IP2Location service response
         country_name = getattr(ip_location, 'country_long', 'Unknown')
         city_name = getattr(ip_location, 'city', 'Unknown')
         
-        # If both country and city are unknown, it might indicate an invalid or private IP
         if country_name == 'Unknown' and city_name == 'Unknown':
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail="Unable to determine location for the provided IP address. It may be private, invalid, or not in our database."
             )
-            
+        
         return LocationResponse(
             country=country_name,
             city=city_name
